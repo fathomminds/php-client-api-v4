@@ -101,6 +101,9 @@ class Client
      */
     public static function escape($string)
     {
+        if ($string === null) {
+            return "null";
+        }
         $search = array("\\",  "\x00", "\n",  "\r",  "'",  '"', "\x1a");
         $replace = array("\\\\","\\0","\\n", "\\r", "\'", '\"', "\\Z");
         return str_replace($search, $replace, $string);

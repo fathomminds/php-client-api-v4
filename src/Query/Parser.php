@@ -329,7 +329,7 @@ class Parser
         $connection->action = '';
         return self::sendQuery($connection);
     }
-    
+
     /**
      * Set query parametrs to execute - Update by "_id".
      *
@@ -387,14 +387,14 @@ class Parser
 		$results = [];
 
 		if ($prepend !== '') {
-			$results['if (typeof ' . $prepend . ' === \'undefined\' || ' . $prepend . '.constructor !== Object ) {' . $prepend . ' = {}}'] = ';';
+			$results['if (typeof ' . $prepend . ' === \'undefined\' || !(' . $prepend . ' instanceof Object) ) {' . $prepend . ' = {}}'] = ';';
 		}
 
 		foreach ($array as $key => $value) {
 			if ($counter > 1) {
 				$key = '["' . $key . '"]';
 			} else {
-				$results['if (typeof ' . $key . ' === \'undefined\' || ' . $key . '.constructor !== Object) {' . $key . ' = {}}'] = ';';
+				$results['if (typeof ' . $key . ' === \'undefined\' || !(' . $key . ' instanceof Object) ) {' . $key . ' = {}}'] = ';';
 			}
 			if (is_array($value) && !empty($value)) {
 				// check if this is meant to be value-only array without assoc keys (P.S. assoc key = field name)
