@@ -390,12 +390,16 @@ class Parser
 			$results['if (typeof ' . $prepend . ' === \'undefined\' || !(' . $prepend . ' instanceof Object) ) {' . $prepend . ' = {}}'] = ';';
 		}
 
-		foreach ($array as $key => $value) {
+		foreach ($array as $key => $arrayValue) {
 			if ($counter > 1) {
 				$key = '["' . $key . '"]';
 			} else {
 				$results['if (typeof ' . $key . ' === \'undefined\' || !(' . $key . ' instanceof Object) ) {' . $key . ' = {}}'] = ';';
 			}
+      $value = $arrayValue;
+      if (is_object($arrayValue)) {
+        $value = (array)$arrayValue;
+      }
 			if (is_array($value) && !empty($value)) {
 				// check if this is meant to be value-only array without assoc keys (P.S. assoc key = field name)
 				if (is_array($value) && (count($value) === 0 || array_keys($value) === range(0, count($value) - 1))) {
