@@ -289,6 +289,18 @@ abstract class Builder
     }
 
     /**
+     * Update document by it's "_id". Only updates existing properties, otherwise the update fails.
+     *
+     * @param  string  $id
+     * @param  mixed  $document
+     * @return \Clusterpoint\Response\Single
+     */
+    public function updateExisting($id, $document = null)
+    {
+        return Parser::updateExisting($id, $document, $this->connection);
+    }
+
+    /**
      * Replace document by it's "_id".
      *
      * @param  string  $id

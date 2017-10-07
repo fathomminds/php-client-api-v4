@@ -367,6 +367,42 @@ class Parser
     }
 
     /**
+     * Set query parameters to execute. Only updates existing properties, otherwise the update fails. - Update by "_id".
+     *
+     * @param  string  $id
+     * @param  array|object  $document
+     * @param  \stdClass $connection
+     * @return \Clusterpoint\Response\Single
+     */
+    public static function updateExisting($id, $document, $connection)
+    {
+        $from = $connection->db;
+        if (strpos($from, '.') !== false) {
+            $tmp = explode('.', $connection->db);
+            $from = end($tmp);
+        }
+
+        $connection->method = 'PATCH';
+        $connection->action = '['.urlencode($id).']';
+        switch (gettype($document)) {
+            case "string":
+                $connection->query = $document;
+                break;
+            case "array":
+            case "object":
+                $connection->method = 'POST';
+                $connection->action = '/_query';
+                $connection->query = 'UPDATE '.$from.'["'.$id.'"] SET '.self::updateExistingRecursion($document);
+                break;
+            default:
+                throw new ClusterpointException("\"->update()\" function: parametr passed ".json_encode(self::escape_string($document))." is not in valid format.", 9002);
+                break;
+
+        }
+        return self::sendQuery($connection);
+    }
+
+    /**
      * Parse document for valid update command.
      *
      * @param  mixed  $document
@@ -376,6 +412,22 @@ class Parser
 	{
 		$result = array();
 		foreach (self::toDotted($document, '', 1) as $path => $value) {
+			$result[] = $path . $value;
+		}
+
+		return implode(' ', $result);
+	}
+
+  /**
+   * Parse document for valid update command.
+   *
+   * @param  mixed  $document
+   * @return string
+   */
+  private static function updateExistingRecursion($document)
+	{
+		$result = array();
+		foreach (self::toDottedExisting($document) as $path => $value) {
 			$result[] = $path . $value;
 		}
 
@@ -418,8 +470,42 @@ class Parser
 			}
 		}
 
-		return $results;
-	}
+        return $results;
+    }
+
+    private static function toDottedExisting($array, $prepend = '')
+    {
+        $results = [];
+
+        foreach ($array as $key => $value) {
+            // Check if property exists
+            $property = $key;
+            if (!empty($prepend)) {
+                $property = $prepend . '["' . $key . '"]';
+            }
+            $results['if (typeof ' . $property . ' === \'undefined\') { throw new Error(\'Property does not exist.\') }'] = ';';
+
+            if (is_array($value)) {
+                if (empty($value)) {
+                    // Check if property is an empty array
+                    $results[$property] = ' = ' . json_encode($value) . ';';
+                } else if (array_keys($value) === range(0, count($value) - 1)) {
+                    // Check if property is not an associative array
+                    $results[$property] = ' = ' . json_encode($value) . ';';
+                } else {
+                    // Call toDottedExisitng recursively if property is an associative array
+                    $results = array_merge($results, self::toDottedExisting($value, $property));
+                }
+            } else if (is_string($value)) {
+                // Escape value and set as string
+                $results[$property] = ' = "' . Client::escape($value) . '";';
+            } else {
+                // Escape value and set
+                $results[$property] = ' = ' . Client::escape($value) . ';';
+            }
+        }
+        return $results;
+    }
 
     /**
      * Set query parametrs to execute - Replace by "_id".
