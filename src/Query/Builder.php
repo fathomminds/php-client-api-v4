@@ -75,7 +75,7 @@ abstract class Builder
     /**
      * Add a basic where clause to the query.
      *
-     * @param  string  $field
+     * @param  string|\Closure  $field
      * @param  string  $operator
      * @param  mixed   $value
      * @param  string  $logical
@@ -97,7 +97,7 @@ abstract class Builder
     /**
      * Add an "or where" clause to the query.
      *
-     * @param  string  $field
+     * @param  string|\Closure  $field
      * @param  string  $operator
      * @param  mixed   $value
      * @return $this
