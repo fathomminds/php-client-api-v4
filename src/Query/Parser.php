@@ -491,7 +491,19 @@ class Parser
                     $results[$property] = ' = ' . json_encode($value) . ';';
                 } else if (array_keys($value) === range(0, count($value) - 1)) {
                     // Check if property is not an associative array
-                    $results[$property] = ' = ' . json_encode($value) . ';';
+                    foreach ($value as $nestedKey => $nestedValue) {
+                        // Check existence of nested array values one-by-one
+                        $nestedProperty = $property . '[' . $nestedKey . ']';
+                        if (is_array($nestedValue)) {
+                            $results = array_merge($results, self::toDottedExisting($nestedValue, $nestedProperty));
+                        } else if (is_string($nestedValue)) {
+                            // Escape value and set as string
+                            $results[$property] = ' = "' . Client::escape($value) . '";';
+                        } else {
+                            // Escape value and set
+                            $results[$property] = ' = ' . Client::escape($value) . ';';
+                        }
+                    }
                 } else {
                     // Call toDottedExisitng recursively if property is an associative array
                     $results = array_merge($results, self::toDottedExisting($value, $property));
