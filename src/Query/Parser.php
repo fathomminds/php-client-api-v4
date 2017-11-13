@@ -59,9 +59,6 @@ class Parser
         }
         if ($operator===null) {
             return "{$logical} {$field} ";
-        } elseif ($value===null) {
-            $value = $operator;
-            $operator = '==';
         }
         if ($field instanceof Key) {
             $field =  self::field("{$field}");
