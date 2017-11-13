@@ -81,7 +81,7 @@ abstract class Builder
      * @param  string  $logical
      * @return $this
      */
-    public function where($field, $operator = null, $value = null, $logical = '&&')
+    public function where($field, $operator = null, $value = null, $logical = '&&', $ignoreNullValue = true)
     {
         if ($field instanceof Closure) {
             $this->scope->where .= $this->scope->where=='' ? ' (' : $logical.' (';
@@ -89,7 +89,7 @@ abstract class Builder
             $this->scope->where .= ') ';
         } else {
             $logical = (strlen($this->scope->where) <=1 || substr($this->scope->where, -1)=='(') ? '' : $logical;
-            $this->scope->where .= Parser::where($field, $operator, $value, $logical);
+            $this->scope->where .= Parser::where($field, $operator, $value, $logical, $ignoreNullValue);
         }
         return $this;
     }
@@ -102,9 +102,9 @@ abstract class Builder
      * @param  mixed   $value
      * @return $this
      */
-    public function orWhere($field, $operator = null, $value = null)
+    public function orWhere($field, $operator = null, $value = null, $ignoreNullValue = true)
     {
-        return $this->where($field, $operator, $value, '||');
+        return $this->where($field, $operator, $value, '||', $ignoreNullValue);
     }
 
     /**
