@@ -52,13 +52,16 @@ class Parser
      * @param  string  $logical
      * @return string
      */
-    public static function where($field, $operator, $value, $logical)
+    public static function where($field, $operator, $value, $logical, $ignoreNullValue = true)
     {
         if (gettype($field)=="array") {
             throw new ClusterpointException("\"->where()\" function: passed field selector is not in valid format.", 9002);
         }
         if ($operator===null) {
             return "{$logical} {$field} ";
+        } elseif ($value===null && $ignoreNullValue) {
+            $value = $operator;
+            $operator = '==';
         }
         if ($field instanceof Key) {
             $field =  self::field("{$field}");
