@@ -153,7 +153,7 @@ class ServiceSpec extends ObjectBehavior
         $this->beConstructedWith(new ConnectionFaker);
         $response = $this->insertMany(array("person_1" => array("name" => "Marks", "surname"=>"Gerasimovs", "age"=>24),"company1"=>array("name" => "Clusterpoint", "address"=>"Riga")));
         $response->executedQuery()->shouldReturn('[{"name":"Marks","surname":"Gerasimovs","age":24},{"name":"Clusterpoint","address":"Riga"}]');
-        $response->shouldReturnAnInstanceOf('\Clusterpoint\Response\Single');
+        $response->shouldReturnAnInstanceOf('\Clusterpoint\Response\Batch');
         $response->shouldBeAnInstanceOf('\Clusterpoint\Response\Response');
     }
 
@@ -162,7 +162,7 @@ class ServiceSpec extends ObjectBehavior
     {
         $this->beConstructedWith(new ConnectionFaker);
         $response = $this->update("_id", array("name" => "Marks"));
-        $response->executedQuery()->shouldReturn('UPDATE database["_id"] SET name = "Marks"');
+        $response->executedQuery()->shouldReturn('UPDATE database["_id"] SET if (typeof name === \'undefined\' || !(name instanceof Object) ) {name = {}}; name = "Marks";');
         $response->shouldReturnAnInstanceOf('\Clusterpoint\Response\Single');
         $response->shouldBeAnInstanceOf('\Clusterpoint\Response\Response');
     }
@@ -171,7 +171,7 @@ class ServiceSpec extends ObjectBehavior
     {
         $this->beConstructedWith(new ConnectionFaker);
         $response = $this->update("_id", array("name" => array("first" => "Marks", "last" => "Gerasimovs")));
-        $response->executedQuery()->shouldReturn('UPDATE database["_id"] SET (typeof name != "undefined") ? name["first"] = "Marks" : name = {"first":"Marks","last":"Gerasimovs"}, (typeof name != "undefined") ?  name["last"] = "Gerasimovs" : name = {"first":"Marks","last":"Gerasimovs"}');
+        $response->executedQuery()->shouldReturn('UPDATE database["_id"] SET if (typeof name === \'undefined\' || !(name instanceof Object) ) {name = {}}; name["first"] = "Marks"; name["last"] = "Gerasimovs";');
         $response->shouldReturnAnInstanceOf('\Clusterpoint\Response\Single');
         $response->shouldBeAnInstanceOf('\Clusterpoint\Response\Response');
     }
